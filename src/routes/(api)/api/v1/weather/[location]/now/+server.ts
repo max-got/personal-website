@@ -1,10 +1,9 @@
-export const prerender = true;
-
 import { json } from '@sveltejs/kit';
-import type { EntryGenerator, RequestHandler } from './$types';
+import type { RequestHandler } from './$types';
 import { Zod_WeatherNow } from '$lib/server/data/api/weather.schema';
 
 import { AVAILABLE_SLUGS, type WeatherLocation } from '$lib/server/data/api/weather.routes';
+import { building } from '$app/environment';
 
 const WEATHER_API_URL = 'https://api.brightsky.dev' as const;
 
@@ -13,13 +12,9 @@ const COORDINATES_MAP = {
 	hiddensee: { lat: 54.38333, lon: 13.08333 }
 } as const satisfies Record<WeatherLocation, { lat: number; lon: number }>;
 
-export const entries: EntryGenerator = () => {
-	return AVAILABLE_SLUGS.map((location) => ({ location }));
-};
-
 export const GET: RequestHandler = async ({ params, isSubRequest }) => {
 	// Only for internal requests
-	if (!isSubRequest) {
+	if (!isSubRequest && !building) {
 		return json(
 			{
 				error: 'Invalid request'
